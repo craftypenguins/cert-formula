@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+cert:
+  lookup: 
+    kubenetes_version: 1.5.4
+    container_repository_base: 'gcr.io/google_containers'
+    hyperkube_image: 'hyperkube'
+    bridge: 'cbr0'
+    path_certs: "/etc/ssl/certs"
+    etcd_image: "etcd-amd64:3.0.14-kubeadm"
+    etcd_manifest_file: "/etc/kubernetes/manifests/etcd.yaml"
+  ca: 
+    constraints: "critical CA:true"
+    key_usage: "critical cRLSign, keyCertSign"
+    days_valid: 3650
+    days_remaining: 0
+  certs: {}
+

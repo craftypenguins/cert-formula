@@ -1,48 +1,74 @@
-{% set map = salt['grains.filter_by']({
-    'Arch': {
-        'cert_dir': '/etc/ssl/certs',
-        'key_dir': '/etc/ssl/private',
-        'pkgs': [ 'ca-certificates', 
-                  'ca-certificates-mozilla',
-                  'ca-certificates-utils',],
-        'cert_user': 'root',
-        'key_user': 'root',
-        'cert_group': 'root',
-        'key_group': 'root',
-        'cert_mode': 644,
-        'key_mode': 600,
-    },
-    'Debian': {
-        'cert_dir': '/etc/ssl/certs',
-        'key_dir': '/etc/ssl/private',
-        'pkgs': [ 'ca-certificates', 'ssl-cert' ],
-        'cert_user': 'root',
-        'key_user': 'root',
-        'cert_group': 'root',
-        'key_group': 'ssl-cert',
-        'cert_mode': 644,
-        'key_mode': 640,
-    },
-    'RedHat': {
-        'cert_dir': '/etc/pki/tls/certs',
-        'key_dir': '/etc/pki/tls/private',
-        'pkgs': [ 'ca-certificates' ],
-        'cert_user': 'root',
-        'key_user': 'root',
-        'cert_group': 'root',
-        'key_group': 'root',
-        'cert_mode': 644,
-        'key_mode': 600,
-   },
-    'Suse': {
-        'cert_dir': '/etc/ssl/certs',
-        'key_dir': '/etc/ssl/private',
-        'pkgs': [ 'ca-certificates', 'ca-certificates-mozilla'],
-        'cert_user': 'root',
-        'key_user': 'root',
-        'cert_group': 'root',
-        'key_group': 'root',
-        'cert_mode': '444',
-        'key_mode': '600',
-    },
-}, grain='os_family', merge=salt['pillar.get']('cert:lookup')) %}
+# -*- coding: utf-8 -*-
+# vim: ft=jinja
+
+{## Start with  defaults from defaults.yaml ##}
+{% import_yaml "cert/defaults.yaml" as defaults %}
+{% set defaults = defaults.cert %}
+
+{% set cert_data = salt['pillar.get']('cert', {
+    'lookup': salt['grains.filter_by']({
+        'Arch': {
+            'cert_dir': '/etc/ssl/certs',
+            'key_dir': '/etc/ssl/private',
+            'pkgs': [ 'ca-certificates', 
+                      'ca-certificates-mozilla',
+                      'ca-certificates-utils',
+                      'python-m2crypto'],
+            'cert_user': 'root',
+            'key_user': 'root',
+            'cert_group': 'root',
+            'key_group': 'root',
+            'cert_mode': 644,
+            'key_mode': 600,
+            'internal_cert_filename': 'intca.crt',
+        },
+        'Debian': {
+            'cert_dir': '/etc/ssl/certs',
+            'key_dir': '/etc/ssl/private',
+            'pkgs': [ 'ca-certificates', 'ssl-cert', 'python-m2crypto' ],
+            'cert_user': 'root',
+            'key_user': 'root',
+            'cert_group': 'root',
+            'key_group': 'ssl-cert',
+            'cert_mode': 644,
+            'key_mode': 640,
+            'internal_cert_filename': 'intca.crt',
+        },
+        'RedHat': {
+            'cert_dir': '/etc/pki/tls/certs',
+            'key_dir': '/etc/pki/tls/private',
+            'pkgs': [ 'ca-certificates','m2crypto' ],
+            'cert_user': 'root',
+            'key_user': 'root',
+            'cert_group': 'root',
+            'key_group': 'root',
+            'cert_mode': 644,
+            'key_mode': 600,
+            'internal_cert_filename': 'intca.crt',
+       },
+        'Suse': {
+            'cert_dir': '/etc/ssl/certs',
+            'key_dir': '/etc/ssl/private',
+            'pkgs': [ 'ca-certificates', 'ca-certificates-mozilla', 'python-m2crypto'],
+            'cert_user': 'root',
+            'key_user': 'root',
+            'cert_group': 'root',
+            'key_group': 'root',
+            'cert_mode': '444',
+            'key_mode': '600',
+            'internal_cert_filename': 'intca.crt',
+        },
+    }),
+    'ca': salt['grains.filter_by']({
+        'Debian': {
+        },
+        'RedHat': {
+        },
+    }),
+    'certs': {}
+    ,
+}, merge=True) %}
+
+{## On day - We will have deep merging ##}
+{% set cert = salt['defaults.merge'](defaults,cert_data) %}
+

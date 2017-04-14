@@ -1,19 +1,14 @@
 # This is the main state file for deploying certificates
 
-{% from "cert/map.jinja" import map with context %}
+{% from "cert/map.jinja" import cert with context %}
 
-# Install required packages
-cert_packages:
-  pkg.installed:
-    - pkgs:
-{% for pkg in map.pkgs %}
-      - {{ pkg }}
-{% endfor %}
+include:
+  - {{slspath}}.packages
 
 # Deploy certificates
 # Place all files in a files_roots/cert, e.g. /srv/salt/files/cert/
 
-{% for name, data in salt['pillar.get']('cert:certlist', {}).items() %}
+{% for name, data in cert.certs.items() %}
 
   {% set key = data.get('key', False) %}
   {% set cert_user = data.get('cert_user', map.cert_user) %}
